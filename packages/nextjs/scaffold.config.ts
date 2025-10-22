@@ -1,7 +1,23 @@
-import * as chains from "viem/chains";
+import PapayosJson from "../hardhat/deployments/bsc/Papayos.json";
+import { Abi } from "viem";
+import {
+  // 1. ELIMINAR la importación de "wagmi/chains"
+  // Reutilizaremos los tipos directamente de viem
+  type Chain, // <--- Importamos 'Chain' de viem
+  bsc, // OK: Esta sí la usas
+} from "viem/chains";
+
+const PAPAYOS_ABI = PapayosJson.abi;
+
+// 2. Definición de las cadenas soportadas (Aquí se USA 'bsc')
+export const enabledChains: readonly Chain[] = [bsc];
+
+// 3. ELIMINAR la variable 'mainnetChains' (ya no es necesaria)
+// const mainnetChains = [bsc]; // <--- ¡Eliminar esta línea!
 
 export type ScaffoldConfig = {
-  targetNetworks: readonly chains.Chain[];
+  // 4. Cambiar el tipo a la importación de 'viem/chains' (que ya usamos)
+  targetNetworks: readonly Chain[];
   pollingInterval: number;
   alchemyApiKey: string;
   rpcOverrides?: Record<number, string>;
@@ -13,7 +29,7 @@ export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [bsc],
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect if you only target the local network (default is 4000)
@@ -41,5 +57,16 @@ const scaffoldConfig = {
   // Only show the Burner Wallet when running on hardhat network
   onlyLocalBurnerWallet: true,
 } as const satisfies ScaffoldConfig;
+
+export const externalContracts = {
+  [bsc.id]: {
+    contracts: {
+      Papayos: {
+        address: "0x5cf26934921c3537db91d0499568f040c5691240",
+        abi: PAPAYOS_ABI as Abi,
+      },
+    },
+  },
+} as const;
 
 export default scaffoldConfig;

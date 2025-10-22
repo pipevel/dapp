@@ -1,6 +1,6 @@
 import { Abi, AbiFunction } from "abitype";
 import { ReadOnlyFunctionForm } from "~~/app/debug/_components/contract";
-import { Contract, ContractName, GenericContract, InheritedFunctions } from "~~/utils/scaffold-eth/contract";
+import { Contract, ContractName, InheritedFunctions } from "~~/utils/scaffold-eth/contract";
 
 export const ContractReadMethods = ({ deployedContractData }: { deployedContractData: Contract<ContractName> }) => {
   if (!deployedContractData) {
@@ -8,7 +8,7 @@ export const ContractReadMethods = ({ deployedContractData }: { deployedContract
   }
 
   const functionsToDisplay = (
-    ((deployedContractData.abi || []) as Abi).filter(part => part.type === "function") as AbiFunction[]
+    (((deployedContractData as any)?.abi || []) as Abi).filter(part => part.type === "function") as AbiFunction[]
   )
     .filter(fn => {
       const isQueryableWithParams =
@@ -18,7 +18,7 @@ export const ContractReadMethods = ({ deployedContractData }: { deployedContract
     .map(fn => {
       return {
         fn,
-        inheritedFrom: ((deployedContractData as GenericContract)?.inheritedFunctions as InheritedFunctions)?.[fn.name],
+        inheritedFrom: ((deployedContractData as any)?.inheritedFunctions as InheritedFunctions)?.[fn.name],
       };
     })
     .sort((a, b) => (b.inheritedFrom ? b.inheritedFrom.localeCompare(a.inheritedFrom) : 1));
@@ -31,8 +31,8 @@ export const ContractReadMethods = ({ deployedContractData }: { deployedContract
     <>
       {functionsToDisplay.map(({ fn, inheritedFrom }) => (
         <ReadOnlyFunctionForm
-          abi={deployedContractData.abi as Abi}
-          contractAddress={deployedContractData.address}
+          abi={(deployedContractData as any)?.abi as Abi}
+          contractAddress={(deployedContractData as any)?.address}
           abiFunction={fn}
           key={fn.name}
           inheritedFrom={inheritedFrom}

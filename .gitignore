@@ -21,3 +21,23 @@ node_modules
 
 # cli
 dist
+
+# Node / JS
+node_modules/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+
+# Hardhat / Truffle / Foundry
+artifacts/
+cache/
+coverage/
+typechain/
+*.db
+
+# Editor / OS
+.vscode/
+.idea/
+*.log

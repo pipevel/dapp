@@ -126,6 +126,10 @@ const config: HardhatUserConfig = {
       url: "https://forno.celo-sepolia.celo-testnet.org/",
       accounts: [deployerPrivateKey],
     },
+    bsc: {
+      url: "https://bsc-dataseed.binance.org/",
+      accounts: [deployerPrivateKey],
+    },
   },
   // Configuration for harhdat-verify plugin
   etherscan: {

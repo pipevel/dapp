@@ -14,7 +14,7 @@ export const ContractVariables = ({
   }
 
   const functionsToDisplay = (
-    (deployedContractData.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
+    (deployedContractData?.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
   )
     .filter(fn => {
       const isQueryableWithNoParams =
@@ -24,7 +24,9 @@ export const ContractVariables = ({
     .map(fn => {
       return {
         fn,
-        inheritedFrom: ((deployedContractData as GenericContract)?.inheritedFunctions as InheritedFunctions)?.[fn.name],
+        inheritedFrom: (
+          (deployedContractData as unknown as GenericContract)?.inheritedFunctions as InheritedFunctions
+        )?.[fn.name],
       };
     })
     .sort((a, b) => (b.inheritedFrom ? b.inheritedFrom.localeCompare(a.inheritedFrom) : 1));
@@ -37,9 +39,9 @@ export const ContractVariables = ({
     <>
       {functionsToDisplay.map(({ fn, inheritedFrom }) => (
         <DisplayVariable
-          abi={deployedContractData.abi as Abi}
+          abi={(deployedContractData as any).Papayos.abi as Abi}
           abiFunction={fn}
-          contractAddress={deployedContractData.address}
+          contractAddress={(deployedContractData as any).Papayos.address}
           key={fn.name}
           refreshDisplayVariables={refreshDisplayVariables}
           inheritedFrom={inheritedFrom}

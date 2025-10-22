@@ -14,7 +14,7 @@ export const ContractWriteMethods = ({
   }
 
   const functionsToDisplay = (
-    (deployedContractData.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
+    ((deployedContractData as any).Papayos.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
   )
     .filter(fn => {
       const isWriteableFunction = fn.stateMutability !== "view" && fn.stateMutability !== "pure";
@@ -23,7 +23,7 @@ export const ContractWriteMethods = ({
     .map(fn => {
       return {
         fn,
-        inheritedFrom: ((deployedContractData as GenericContract)?.inheritedFunctions as InheritedFunctions)?.[fn.name],
+        inheritedFrom: ((contractData as GenericContract)?.inheritedFunctions as InheritedFunctions)?.[fn.name],
       };
     })
     .sort((a, b) => (b.inheritedFrom ? b.inheritedFrom.localeCompare(a.inheritedFrom) : 1));
@@ -31,16 +31,17 @@ export const ContractWriteMethods = ({
   if (!functionsToDisplay.length) {
     return <>No write methods</>;
   }
+  const contractData = (deployedContractData as any).Papayos;
 
   return (
     <>
       {functionsToDisplay.map(({ fn, inheritedFrom }, idx) => (
         <WriteOnlyFunctionForm
-          abi={deployedContractData.abi as Abi}
-          key={`${fn.name}-${idx}}`}
+          abi={contractData.abi as Abi}
+          key={`${fn.name}-${idx}`}
           abiFunction={fn}
           onChange={onChange}
-          contractAddress={deployedContractData.address}
+          contractAddress={contractData.address}
           inheritedFrom={inheritedFrom}
         />
       ))}

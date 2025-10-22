@@ -1,65 +1,110 @@
 "use client";
 
-import Link from "next/link";
+// import Link from "next/link";
+import PapayosJson from "../../hardhat/deployments/bsc/Papayos.json";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { formatUnits } from "viem";
+import { parseUnits } from "viem";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
+// import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
+const PAPAYOS_ABI = PapayosJson.abi;
 const Home: NextPage = () => {
+  const recipientAddress = "0xe790B4BEa7D812Ee9555944f8510dca7A51C31d2";
+  const rawAmount = "5";
+  const PPY_DECIMALS = 8;
+  const amountToSend = parseUnits(rawAmount, PPY_DECIMALS);
+  const PPY_TOKEN_ADDRESS = "0x5cf26934921c3537db91d0499568f040c5691240";
+  const BSC_MAINNET_ID = 56;
+
   const { address: connectedAddress } = useAccount();
+  const { data: ppyBalance, isLoading: isBalanceLoading } = useReadContract({
+    address: PPY_TOKEN_ADDRESS as `0x${string}`,
+    abi: PAPAYOS_ABI,
+    functionName: "balanceOf",
+    args: [connectedAddress],
+    chainId: BSC_MAINNET_ID,
+    query: {
+      enabled: !!connectedAddress,
+    },
+  });
+
+  const { writeContract, isPending: isMining } = useWriteContract();
+
+  const { data: totalSupply } = useReadContract({
+    address: PPY_TOKEN_ADDRESS as `0x${string}`,
+    abi: PAPAYOS_ABI,
+    functionName: "totalSupply",
+    args: [],
+    chainId: BSC_MAINNET_ID,
+    query: {
+      enabled: true,
+    },
+  });
+
+  let formattedTotalSupply = "0.00";
+  if (totalSupply && typeof totalSupply === "bigint") {
+    const rawDecimalString = formatUnits(totalSupply, PPY_DECIMALS);
+
+    formattedTotalSupply = Number(rawDecimalString).toLocaleString("es-ES", {});
+  }
+
+  let formattedPpyBalance = "0.00";
+  if (ppyBalance && typeof ppyBalance === "bigint") {
+    formattedPpyBalance = formatUnits(ppyBalance, PPY_DECIMALS);
+  }
 
   return (
     <>
       <div className="flex items-center flex-col grow pt-10">
         <div className="px-5">
           <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
+            <span className="block text-2xl mb-2">Bienenidos a Lapapaya</span>
+            <span className="block text-4xl font-bold">
+              El PPY Token nos ha permitido recoger 22 Toneladas de residuos del río Cali
+            </span>
           </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
 
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
+          <div className="flex items-center flex-col grow pt-10">
+            <div className="px-5">
+              <h1 className="text-center">{"PPY"}</h1>
+              <div className="flex justify-center items-center space-x-2 flex-col">
+                <p className="my-2 font-medium">Connected Address:</p>
+                <Address address={connectedAddress} />
+              </div>
+
+              <div className="nt-4 text-center p-4 bg-base-200 rounded-lg shadow-md">
+                {isBalanceLoading ? (
+                  <p className="text-xl text-secondary font-semibold"> Cargando Balance PPY... </p>
+                ) : (
+                  <p className="text-2xl font-extrabold text-primary">Balance Papayos (PPY) : {formattedPpyBalance}</p>
+                )}
+              </div>
+              <p className="text-md font-semibold text-gray-600">Suministro total de PPY: {formattedTotalSupply}</p>
             </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
+            <div className="flex flex-col items-center pt-10">
+              <h1 className="text-xl font-bold">Transferencia de Papayos (PPY)</h1>
+              <p className="mb-4">
+                Enviando {rawAmount} PPY a la dirección: {recipientAddress}
               </p>
+
+              <button
+                className="btn btn-primary"
+                // B. Llama a writeContract pasando la configuración de la transacción
+                onClick={() =>
+                  writeContract({
+                    address: PPY_TOKEN_ADDRESS as `0x${string}`,
+                    abi: PAPAYOS_ABI,
+                    functionName: "transfer",
+                    args: [recipientAddress, amountToSend],
+                    value: 0n,
+                  })
+                }
+                disabled={isMining}
+              >
+                {isMining ? "Procesando..." : "Transferir Papayos"}
+              </button>
             </div>
           </div>
         </div>
