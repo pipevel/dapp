@@ -1,18 +1,8 @@
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import {
-  coinbaseWallet,
-  ledgerWallet,
-  metaMaskWallet,
-  rainbowWallet,
-  safeWallet,
-  walletConnectWallet,
-} from "@rainbow-me/rainbowkit/wallets";
-import { rainbowkitBurnerWallet } from "burner-connector";
-import * as chains from "viem/chains";
+import { metadata } from "./wagmiConfig";
+import { connectorsForWallets, getDefaultWallets } from "@rainbow-me/rainbowkit";
 import scaffoldConfig from "~~/scaffold.config";
 
-const { onlyLocalBurnerWallet, targetNetworks } = scaffoldConfig;
-
+/*
 const wallets = [
   metaMaskWallet,
   walletConnectWallet,
@@ -24,11 +14,16 @@ const wallets = [
     ? [rainbowkitBurnerWallet]
     : []),
 ];
+*/
 
 /**
  * wagmi connectors for the wagmi context
  */
 export const wagmiConnectors = () => {
+  const { wallets } = getDefaultWallets({
+    appName: metadata.name,
+    projectId: "305d4a41f46f09065636b9710ac3b76c",
+  });
   // Only create connectors on client-side to avoid SSR issues
   // TODO: update when https://github.com/rainbow-me/rainbowkit/issues/2476 is resolved
   if (typeof window === "undefined") {
@@ -36,12 +31,7 @@ export const wagmiConnectors = () => {
   }
 
   return connectorsForWallets(
-    [
-      {
-        groupName: "Supported Wallets",
-        wallets,
-      },
-    ],
+    wallets,
 
     {
       appName: "scaffold-eth-2",

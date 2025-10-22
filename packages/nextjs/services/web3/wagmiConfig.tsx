@@ -5,6 +5,13 @@ import { createConfig } from "wagmi";
 import scaffoldConfig, { DEFAULT_ALCHEMY_API_KEY, ScaffoldConfig } from "~~/scaffold.config";
 import { getAlchemyHttpUrl } from "~~/utils/scaffold-eth";
 
+export const metadata = {
+  name: "PPY",
+  description: "Pagos online con papayos",
+  url: "https://dapp-ppy.vercel.app/",
+  icons: ["https://dapp-ppy.vercel.app/logo.svg"],
+};
+
 const { targetNetworks } = scaffoldConfig;
 
 // We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
